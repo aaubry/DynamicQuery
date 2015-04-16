@@ -187,7 +187,7 @@ namespace System.Linq.Dynamic
 		static readonly string keywordIif = "iif";
 		static readonly string keywordNew = "new";
 
-		static Dictionary<string, object> keywords;
+		private readonly Dictionary<string, object> keywords;
 
 		Dictionary<string, object> symbols;
 		IDictionary<string, object> externals;
@@ -199,10 +199,24 @@ namespace System.Linq.Dynamic
 		char ch;
 		Token token;
 
-		public ExpressionParser(ParameterExpression[] parameters, string expression, object[] values)
+		private ICollection<Type> allowedTypes;
+
+		public ExpressionParser(ParameterExpression[] parameters, string expression, object[] values, ICollection<Type> additionalAllowedTypes = null)
 		{
-			if (expression == null) throw new ArgumentNullException("expression");
-			if (keywords == null) keywords = CreateKeywords();
+			if (additionalAllowedTypes == null || additionalAllowedTypes.Count == 0)
+			{
+				allowedTypes = predefinedTypes;
+			}
+			else
+			{
+				allowedTypes = new HashSet<Type>(predefinedTypes.Concat(additionalAllowedTypes));
+			}
+
+			if (expression == null)
+				throw new ArgumentNullException("expression");
+			
+			keywords = CreateKeywords();
+
 			symbols = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 			literals = new Dictionary<Expression, string>();
 			if (parameters != null)
@@ -986,9 +1000,10 @@ namespace System.Linq.Dynamic
 			}
 		}
 
-		static bool IsPredefinedType(Type type)
+		private bool IsPredefinedType(Type type)
 		{
-			foreach (Type t in predefinedTypes) if (t == type) return true;
+			foreach (Type t in allowedTypes) if (t == type)
+					return true;
 			return false;
 		}
 
@@ -1859,7 +1874,7 @@ namespace System.Linq.Dynamic
 			return new ParseException(string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args), pos);
 		}
 
-		static Dictionary<string, object> CreateKeywords()
+		private Dictionary<string, object> CreateKeywords()
 		{
 			Dictionary<string, object> d = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 			d.Add("true", trueLiteral);
@@ -1868,7 +1883,8 @@ namespace System.Linq.Dynamic
 			d.Add(keywordIt, keywordIt);
 			d.Add(keywordIif, keywordIif);
 			d.Add(keywordNew, keywordNew);
-			foreach (Type type in predefinedTypes) d.Add(type.Name, type);
+			foreach (Type type in allowedTypes)
+				d.Add(type.Name, type);
 			return d;
 		}
 	}
