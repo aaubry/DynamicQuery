@@ -1365,8 +1365,9 @@ namespace System.Linq.Dynamic
 				return target.IsAssignableFrom(source);
 			Type st = GetNonNullableType(source);
 			Type tt = GetNonNullableType(target);
-			if (st != source && tt == target) return false;
-			TypeCode sc = st.IsEnum ? TypeCode.Object : Type.GetTypeCode(st);
+			if (st != source && tt == target)
+				return false;
+			TypeCode sc = Type.GetTypeCode(st);
 			TypeCode tc = tt.IsEnum ? TypeCode.Object : Type.GetTypeCode(tt);
 			switch (sc)
 			{
