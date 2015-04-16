@@ -156,6 +156,68 @@ namespace System.Linq.Dynamic.Tests
 			Assert.True(func(new[] { Tuple.Create("1"), Tuple.Create("2") }, new[] { "1", "3" }));
 			Assert.False(func(new[] { Tuple.Create("1"), Tuple.Create("2") }, new[] { "3" }));
 		}
+
+		[Fact]
+		public void CanParseAs()
+		{
+			var expression = "(resource as System.String).Length";
+
+			var parameters = new[]
+			{
+				Expression.Parameter(typeof(object), "resource"),
+			};
+
+			var expr = (Expression<Func<object, int>>)DynamicExpression.ParseLambda(parameters, typeof(int), expression);
+
+			Console.WriteLine(expr);
+
+			Assert.NotNull(expr);
+
+			var func = expr.Compile();
+
+			Assert.Equal(5, func("hello"));
+		}
+
+		[Fact]
+		public void CanParseIs()
+		{
+			var expression = "resource is System.String";
+
+			var parameters = new[]
+			{
+				Expression.Parameter(typeof(object), "resource"),
+			};
+
+			var expr = (Expression<Func<object, bool>>)DynamicExpression.ParseLambda(parameters, typeof(bool), expression);
+
+			Console.WriteLine(expr);
+
+			Assert.NotNull(expr);
+
+			var func = expr.Compile();
+
+			Assert.True(func("hello"));
+			Assert.False(func(2));
+		}
+
+		[Fact]
+		public void CanParseNew()
+		{
+			var expression = "new(resource.Length alias Len)";
+
+			var parameters = new[]
+			{
+				Expression.Parameter(typeof(string), "resource"),
+			};
+
+			var expr = (Expression<Func<string, object>>)DynamicExpression.ParseLambda(parameters, typeof(object), expression);
+
+			Console.WriteLine(expr);
+
+			Assert.NotNull(expr);
+
+			var func = expr.Compile();
+		}
 	}
 
 	public enum MyEnum

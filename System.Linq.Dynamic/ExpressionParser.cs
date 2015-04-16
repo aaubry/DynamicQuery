@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace System.Linq.Dynamic
@@ -48,7 +49,9 @@ namespace System.Linq.Dynamic
 			LessGreater,
 			DoubleEqual,
 			GreaterThanEqual,
-			DoubleBar
+			DoubleBar,
+			AsType,
+			IsType,
 		}
 
 		interface ILogicalSignatures
@@ -347,6 +350,40 @@ namespace System.Linq.Dynamic
 			return expr;
 		}
 
+		private Type ParseTypeName()
+		{
+			var typeNameParts = new List<string>();
+			do
+			{
+				NextToken();
+				if (token.id != TokenId.Identifier)
+				{
+					throw ParseError(token.pos, "Expected identifier");
+				}
+
+				typeNameParts.Add(token.text);
+				NextToken();
+			} while (token.id == TokenId.Dot);
+
+			var type = GetType(string.Join(".", typeNameParts));
+			return type;
+		}
+
+		private static Type GetType(string name)
+		{
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+			var type = assemblies
+				.Select(a => a.GetType(name, throwOnError: false))
+				.FirstOrDefault(t => t != null);
+
+			if (type == null)
+			{
+				throw new TypeLoadException(string.Format("Could not load type '{0}' from any of the following assemblies:{1}", name, string.Join("", assemblies.Select(a => "\n  - " + a.FullName))));
+			}
+
+			return type;
+		}
 		// ||, or operator
 		private Expression ParseLogicalOr()
 		{
@@ -377,84 +414,100 @@ namespace System.Linq.Dynamic
 			return left;
 		}
 
-		// =, ==, !=, <>, >, >=, <, <= operators
+		// =, ==, !=, <>, >, >=, <, <=, as, is operators
 		private Expression ParseComparison()
 		{
 			Expression left = ParseAdditive();
+
 			while (token.id == TokenId.Equal || token.id == TokenId.DoubleEqual ||
 				token.id == TokenId.ExclamationEqual || token.id == TokenId.LessGreater ||
 				token.id == TokenId.GreaterThan || token.id == TokenId.GreaterThanEqual ||
-				token.id == TokenId.LessThan || token.id == TokenId.LessThanEqual)
+				token.id == TokenId.LessThan || token.id == TokenId.LessThanEqual ||
+				token.id == TokenId.AsType || token.id == TokenId.IsType)
 			{
 				Token op = token;
-				NextToken();
-				Expression right = ParseAdditive();
-				bool isEquality = op.id == TokenId.Equal || op.id == TokenId.DoubleEqual ||
-					op.id == TokenId.ExclamationEqual || op.id == TokenId.LessGreater;
-				if (isEquality && !left.Type.IsValueType && !right.Type.IsValueType)
+
+				if (token.id == TokenId.AsType)
 				{
-					if (left.Type != right.Type)
-					{
-						if (left.Type.IsAssignableFrom(right.Type))
-						{
-							right = Expression.Convert(right, left.Type);
-						}
-						else if (right.Type.IsAssignableFrom(left.Type))
-						{
-							left = Expression.Convert(left, right.Type);
-						}
-						else
-						{
-							throw IncompatibleOperandsError(op.text, left, right, op.pos);
-						}
-					}
+					var type = ParseTypeName();
+					left = Expression.TypeAs(left, type);
 				}
-				else if (IsEnumType(left.Type) || IsEnumType(right.Type))
+				else if (token.id == TokenId.IsType)
 				{
-					if (left.Type != right.Type)
-					{
-						Expression e;
-						if ((e = PromoteExpression(right, left.Type, true)) != null)
-						{
-							right = e;
-						}
-						else if ((e = PromoteExpression(left, right.Type, true)) != null)
-						{
-							left = e;
-						}
-						else
-						{
-							throw IncompatibleOperandsError(op.text, left, right, op.pos);
-						}
-					}
+					var type = ParseTypeName();
+					left = Expression.TypeIs(left, type);
 				}
 				else
 				{
-					CheckAndPromoteOperands(isEquality ? typeof(IEqualitySignatures) : typeof(IRelationalSignatures),
-						op.text, ref left, ref right, op.pos);
-				}
-				switch (op.id)
-				{
-					case TokenId.Equal:
-					case TokenId.DoubleEqual:
-						left = GenerateEqual(left, right);
-						break;
-					case TokenId.ExclamationEqual:
-					case TokenId.LessGreater:
-						left = GenerateNotEqual(left, right);
-						break;
-					case TokenId.GreaterThan:
-						left = GenerateGreaterThan(left, right);
-						break;
-					case TokenId.GreaterThanEqual:
-						left = GenerateGreaterThanEqual(left, right);
-						break;
-					case TokenId.LessThan:
-						left = GenerateLessThan(left, right);
-						break;
-					case TokenId.LessThanEqual:
-						left = GenerateLessThanEqual(left, right);
-						break;
+					NextToken();
+					Expression right = ParseAdditive();
+					bool isEquality = op.id == TokenId.Equal || op.id == TokenId.DoubleEqual ||
+						op.id == TokenId.ExclamationEqual || op.id == TokenId.LessGreater;
+					if (isEquality && !left.Type.IsValueType && !right.Type.IsValueType)
+					{
+						if (left.Type != right.Type)
+						{
+							if (left.Type.IsAssignableFrom(right.Type))
+							{
+								right = Expression.Convert(right, left.Type);
+							}
+							else if (right.Type.IsAssignableFrom(left.Type))
+							{
+								left = Expression.Convert(left, right.Type);
+							}
+							else
+							{
+								throw IncompatibleOperandsError(op.text, left, right, op.pos);
+							}
+						}
+					}
+					else if (IsEnumType(left.Type) || IsEnumType(right.Type))
+					{
+						if (left.Type != right.Type)
+						{
+							Expression e;
+							if ((e = PromoteExpression(right, left.Type, true)) != null)
+							{
+								right = e;
+							}
+							else if ((e = PromoteExpression(left, right.Type, true)) != null)
+							{
+								left = e;
+							}
+							else
+							{
+								throw IncompatibleOperandsError(op.text, left, right, op.pos);
+							}
+						}
+					}
+					else
+					{
+						CheckAndPromoteOperands(isEquality ? typeof(IEqualitySignatures) : typeof(IRelationalSignatures),
+							op.text, ref left, ref right, op.pos);
+					}
+					switch (op.id)
+					{
+						case TokenId.Equal:
+						case TokenId.DoubleEqual:
+							left = GenerateEqual(left, right);
+							break;
+						case TokenId.ExclamationEqual:
+						case TokenId.LessGreater:
+							left = GenerateNotEqual(left, right);
+							break;
+						case TokenId.GreaterThan:
+							left = GenerateGreaterThan(left, right);
+							break;
+						case TokenId.GreaterThanEqual:
+							left = GenerateGreaterThanEqual(left, right);
+							break;
+						case TokenId.LessThan:
+							left = GenerateLessThan(left, right);
+							break;
+						case TokenId.LessThanEqual:
+							left = GenerateLessThanEqual(left, right);
+							break;
+					}
 				}
 			}
 			return left;
@@ -803,7 +856,7 @@ namespace System.Linq.Dynamic
 				int exprPos = token.pos;
 				Expression expr = ParseExpression();
 				string propName;
-				if (TokenIdentifierIs("as"))
+				if (TokenIdentifierIs("alias"))
 				{
 					NextToken();
 					propName = GetIdentifier();
@@ -1889,6 +1942,15 @@ namespace System.Linq.Dynamic
 			token.id = t;
 			token.text = text.Substring(tokenPos, textPos - tokenPos);
 			token.pos = tokenPos;
+
+			if (TokenIdentifierIs("as"))
+			{
+				token.id = TokenId.AsType;
+			}
+			else if (TokenIdentifierIs("is"))
+			{
+				token.id = TokenId.IsType;
+			}
 		}
 
 		private bool TokenIdentifierIs(string id)

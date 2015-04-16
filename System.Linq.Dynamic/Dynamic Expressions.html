@@ -792,7 +792,7 @@ style='color:#A31515'>&quot;London&quot;</span>, 10).<br>
 &nbsp;&nbsp;&nbsp; <span class=SpellE><span class=GramE>OrderBy</span></span><span
 class=GramE>(</span><span style='color:#A31515'>&quot;<span class=SpellE>CompanyName</span>&quot;</span>).<br>
 &nbsp;&nbsp;&nbsp; <span class=GramE>Select(</span><span style='color:#A31515'>&quot;new(<span
-class=SpellE>CompanyName</span> as Name, Phone)&quot;</span>);</p>
+class=SpellE>CompanyName</span> alias Name, Phone)&quot;</span>);</p>
 
 <p class=MsoNormal>Note that expressions in the query are strings that could
 have been dynamically constructed at run-time.</p>
@@ -1868,10 +1868,10 @@ denotes a member.</p>
   </td>
  </tr>
  <tr style='mso-yfti-irow:19'>
-  <td width=103 rowspan=6 valign=top style='width:77.4pt;border:solid black 1.0pt;
+  <td width=103 rowspan=8 valign=top style='width:77.4pt;border:solid black 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
-  3.0pt;margin-left:0in;line-height:normal'>Relational</p>
+  3.0pt;margin-left:0in;line-height:normal'>Relational and type testing</p>
   </td>
   <td width=108 valign=top style='width:81.0pt;border-top:none;border-left:
   none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
@@ -1976,6 +1976,37 @@ denotes a member.</p>
   <span class=SpellE><span class=CodeFragment>Guid</span></span>.</p>
   </td>
  </tr>
+
+<tr style='mso-yfti-irow:24'>
+  <td width=108 valign=top style='width:81.0pt;border-top:none;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
+  3.0pt;margin-left:0in;line-height:normal'><span class=CodeFragment>x is &lt;typename&gt;</span></p>
+  </td>
+  <td width=354 valign=top style='width:265.5pt;border-top:none;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
+  3.0pt;margin-left:0in;line-height:normal'>Checks if an object is compatible with a given type.<br/>E.g. <code>x is System.String</code></p>
+  </td>
+ </tr>
+
+<tr style='mso-yfti-irow:24'>
+  <td width=108 valign=top style='width:81.0pt;border-top:none;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
+  3.0pt;margin-left:0in;line-height:normal'><span class=CodeFragment>x as &lt;typename&gt;</span></p>
+  </td>
+  <td width=354 valign=top style='width:265.5pt;border-top:none;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
+  3.0pt;margin-left:0in;line-height:normal'>The as operator is like a cast operation. However, if the conversion isn't possible, as returns null instead of raising an exception.<br/>E.g. <code>(x as System.String).Length</code></p>
+  </td>
+ </tr>
+
  <tr style='mso-yfti-irow:25'>
   <td width=103 valign=top style='width:77.4pt;border:solid black 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
@@ -2082,7 +2113,7 @@ that class. The properties of the data class are inferred from the data object <
 class=SpellE>initializer</span>. Specifically, a data object <span
 class=SpellE>initializer</span> of the form</p>
 
-<p class=Code><span class=GramE>new(</span>e1 as p1, e2 as p2, e3 as p3)</p>
+<p class=Code><span class=GramE>new(</span>e1 alias p1, e2 alias p2, e3 alias p3)</p>
 
 <p class=MsoNormal><span class=GramE>creates</span> a data class with three
 properties, <span class=CodeFragment>p1</span>, <span class=CodeFragment>p2</span>,
