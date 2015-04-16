@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Linq.Dynamic", "System.Linq.Dynamic\System.Linq.Dynamic.csproj", "{BE182E4F-48A7-4AE6-A43A-D2A5D8089B77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Linq.Dynamic.Tests", "System.Linq.Dynamic.Tests\System.Linq.Dynamic.Tests.csproj", "{2E059D52-D345-48AD-A944-F3F252D0EB15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BE182E4F-48A7-4AE6-A43A-D2A5D8089B77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE182E4F-48A7-4AE6-A43A-D2A5D8089B77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE182E4F-48A7-4AE6-A43A-D2A5D8089B77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E059D52-D345-48AD-A944-F3F252D0EB15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E059D52-D345-48AD-A944-F3F252D0EB15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E059D52-D345-48AD-A944-F3F252D0EB15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E059D52-D345-48AD-A944-F3F252D0EB15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
