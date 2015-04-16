@@ -1509,7 +1509,7 @@ denotes a member.</p>
   </tr>
  </thead>
  <tr style='mso-yfti-irow:1'>
-  <td width=103 rowspan=10 valign=top style='width:77.4pt;border:solid black 1.0pt;
+  <td width=103 rowspan=11 valign=top style='width:77.4pt;border:solid black 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
   3.0pt;margin-left:0in;line-height:normal'>Primary</p>
@@ -1651,7 +1651,25 @@ denotes a member.</p>
   object itself.</p>
   </td>
  </tr>
- <tr style='mso-yfti-irow:9'>
+	<tr style='mso-yfti-irow:8'>
+		<td width=108 valign=top style='width:81.0pt;border-top:none;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+			<p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
+  3.0pt;margin-left:0in;line-height:normal'><span class=CodeFragment>it_1, it_2, etc.</span></p>
+		</td>
+		<td width=354 valign=top style='width:265.5pt;border-top:none;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+			<p class=MsoNormal style='margin-top:3.0pt;margin-right:0in;margin-bottom:
+  3.0pt;margin-left:0in;line-height:normal'>
+				<a href="#_Current_Instance">Current instance from a parent context</a>. In contexts where members of a current object are implicitly in
+				scope, <span class=CodeFragment>it_x</span> is used to refer to the entire
+				object itself.
+			</p>
+		</td>
+	</tr>
+<tr style='mso-yfti-irow:9'>
   <td width=108 valign=top style='width:81.0pt;border-top:none;border-left:
   none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
@@ -2111,6 +2129,12 @@ class=GramE>(</span><span style='color:#A31515'>&quot;<span class=SpellE>it.Coun
 <p class=MsoNormal>The <a href="#_IQueryable_Extension_Methods">IQueryable
 extension methods</a> all parse their expression arguments as lambda
 expressions with a single unnamed parameter.</p>
+
+	<p class=MsoNormal>
+		It is possible to access the current instance of a parent scope by using the it_x syntax, where
+		x is a number that indicates how many scopes to walk up. For example, it_1 refers to the parent scope,
+		and it_2 refers to the grand-parent scope. it_0 is equivalent to it.
+	</p>
 
 <h2><a name="_Dynamic_Expression_Invocation"></a><span style='mso-fareast-font-family:
 "Times New Roman"'>Dynamic Lambda Invocation<o:p></o:p></span></h2>

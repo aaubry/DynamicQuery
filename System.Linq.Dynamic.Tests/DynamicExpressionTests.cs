@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
+using DynamicExpression = System.Linq.Dynamic.DynamicExpression;
 
 namespace System.Linq.Dynamic.Tests
 {
@@ -130,6 +133,29 @@ namespace System.Linq.Dynamic.Tests
             Assert.Equal("1", func(new[] { "1", "2", "3" }));
             Assert.Null(func(new string[] { }));
         }
+
+		[Fact]
+		public void CanParseNestedLambdasWithOuterVariableReference()
+		{
+			var expression = "resource.Any(allowed.Contains(it_1.Item1))";
+
+			var parameters = new[]
+			{
+				Expression.Parameter(typeof(Tuple<string>[]), "resource"),
+				Expression.Parameter(typeof(string[]), "allowed"),
+			};
+
+			var expr = (Expression<Func<Tuple<string>[], string[], bool>>)DynamicExpression.ParseLambda(parameters, typeof(bool), expression);
+
+			Console.WriteLine(expr);
+
+			Assert.NotNull(expr);
+
+			var func = expr.Compile();
+
+			Assert.True(func(new[] { Tuple.Create("1"), Tuple.Create("2") }, new[] { "1", "3" }));
+			Assert.False(func(new[] { Tuple.Create("1"), Tuple.Create("2") }, new[] { "3" }));
+		}
 	}
 
 	public enum MyEnum
