@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -127,6 +127,8 @@ namespace System.Linq.Dynamic
 		interface IEnumerableSignatures
 		{
 			void Where(bool predicate);
+            void FirstOrDefault(bool predicate);
+            void FirstOrDefault();
 			void Any();
 			void Any(bool predicate);
 			void All(bool predicate);
@@ -154,6 +156,17 @@ namespace System.Linq.Dynamic
 			void Average(double? selector);
 			void Average(decimal selector);
 			void Average(decimal? selector);
+			void Contains(int value);
+			void Contains(int? value);
+			void Contains(long value);
+			void Contains(long? value);
+			void Contains(float value);
+			void Contains(float? value);
+			void Contains(double value);
+			void Contains(double? value);
+			void Contains(decimal value);
+			void Contains(decimal? value);
+			void Contains(string value);
 		}
 
 		static readonly Type[] predefinedTypes = {
@@ -939,7 +952,14 @@ namespace System.Linq.Dynamic
 			}
 			else
 			{
-				args = new Expression[] { instance, Expression.Lambda(args[0], innerIt) };
+				if (signature.Name == "Contains")
+				{
+					args = new Expression[] { instance, args[0] };
+				}
+				else
+				{
+					args = new Expression[] { instance, Expression.Lambda(args[0], innerIt) };
+				}
 			}
 			return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		}
