@@ -289,8 +289,9 @@ namespace System.Linq.Dynamic
 					NextToken();
 					ascending = false;
 				}
-				orderings.Add(new DynamicOrdering { Selector = expr, Ascending = ascending });
-				if (token.id != TokenId.Comma) break;
+				orderings.Add(new DynamicOrdering { Selector = expr, Parameter = it, Ascending = ascending });
+				if (token.id != TokenId.Comma)
+					break;
 				NextToken();
 			}
 			ValidateToken(TokenId.End, Res.SyntaxError);

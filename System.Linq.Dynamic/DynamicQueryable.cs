@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -41,7 +41,56 @@ namespace System.Linq.Dynamic
 
 		public static IQueryable<T> OrderBy<T>(this IQueryable<T> source, string ordering, params object[] values)
 		{
-			return (IQueryable<T>)OrderBy((IQueryable)source, ordering, values);
+			if (source == null)
+			{
+				throw new ArgumentNullException("source");
+			}
+			if (ordering == null)
+			{
+				throw new ArgumentNullException("ordering");
+			}
+			var parameters = new[]
+			{
+                Expression.Parameter(source.ElementType, "")
+			};
+
+			var parser = new ExpressionParser(parameters, ordering, values);
+			var orderings = parser.ParseOrdering();
+			
+			object result = source;
+
+			var helperMethodName = "OrderByHelper";
+			foreach (var order in orderings)
+			{
+				var keySelectorExpression = Expression.Lambda(
+					order.Selector,
+					order.Parameter
+				);
+
+				var orderByHelperMethod = typeof(DynamicQueryable)
+					.GetMethod(helperMethodName, BindingFlags.NonPublic | BindingFlags.Static)
+					.MakeGenericMethod(typeof(T), order.Selector.Type);
+
+				result = orderByHelperMethod.Invoke(null, new object[] { result, keySelectorExpression, order.Ascending });
+
+				helperMethodName = "ThenByHelper";
+			}
+
+			return (IOrderedQueryable<T>)result;
+		}
+
+		private static IOrderedQueryable<T> OrderByHelper<T, TKey>(IQueryable<T> source, Expression<Func<T, TKey>> keySelector, bool ascending)
+		{
+			return ascending
+				? source.OrderBy(keySelector)
+				: source.OrderByDescending(keySelector);
+		}
+
+		private static IOrderedQueryable<T> ThenByHelper<T, TKey>(IOrderedQueryable<T> source, Expression<Func<T, TKey>> keySelector, bool ascending)
+		{
+			return ascending
+				? source.ThenBy(keySelector)
+				: source.ThenByDescending(keySelector);
 		}
 
 		public static IQueryable OrderBy(this IQueryable source, string ordering, params object[] values)
