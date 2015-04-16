@@ -211,7 +211,6 @@ namespace System.Linq.Dynamic
 		private Dictionary<string, object> symbols;
 		private IDictionary<string, object> externals;
 		private Dictionary<Expression, string> literals;
-		//private ParameterExpression it;
 
 		private readonly Stack<ParameterExpression> itStack = new Stack<ParameterExpression>();
 		private ParameterExpression It { get { return itStack.Any() ? itStack.Peek() : null; } }
@@ -369,17 +368,27 @@ namespace System.Linq.Dynamic
 			return type;
 		}
 
-		private static Type GetType(string name)
+		private Type GetType(string name)
 		{
-			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-			var type = assemblies
-				.Select(a => a.GetType(name, throwOnError: false))
-				.FirstOrDefault(t => t != null);
+			Type type = null;
+			object keyword;
+			if (keywords.TryGetValue(name, out keyword))
+			{
+				type = keyword as Type;
+			}
 
 			if (type == null)
 			{
-				throw new TypeLoadException(string.Format("Could not load type '{0}' from any of the following assemblies:{1}", name, string.Join("", assemblies.Select(a => "\n  - " + a.FullName))));
+				var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+				type = assemblies
+					.Select(a => a.GetType(name, throwOnError: false))
+					.FirstOrDefault(t => t != null);
+
+				if (type == null)
+				{
+					throw new TypeLoadException(string.Format("Could not load type '{0}' from any of the following assemblies:{1}", name, string.Join("", assemblies.Select(a => "\n  - " + a.FullName))));
+				}
 			}
 
 			return type;

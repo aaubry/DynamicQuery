@@ -218,6 +218,27 @@ namespace System.Linq.Dynamic.Tests
 
 			var func = expr.Compile();
 		}
+
+		[Fact]
+		public void CanParseIsUsingBuiltInType()
+		{
+			var expression = "resource is Double";
+
+			var parameters = new[]
+			{
+				Expression.Parameter(typeof(object), "resource"),
+			};
+
+			var expr = (Expression<Func<object, bool>>)DynamicExpression.ParseLambda(parameters, typeof(bool), expression);
+
+			Console.WriteLine(expr);
+
+			Assert.NotNull(expr);
+
+			var func = expr.Compile();
+
+			Assert.True(func(2.2));
+		}
 	}
 
 	public enum MyEnum
