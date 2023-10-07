@@ -265,7 +265,12 @@ namespace System.Linq.Dynamic
 				}
 			}
 
-			if (parameters.Length == 1 && String.IsNullOrEmpty(parameters[0].Name))
+			var itParam = parameters.FirstOrDefault(p => p.Name == keywordIt);
+			if (itParam != null)
+			{
+				itStack.Push(itParam);
+			}
+			else if (parameters.Length == 1 && String.IsNullOrEmpty(parameters[0].Name))
 			{
 				itStack.Push(parameters[0]);
 			}
