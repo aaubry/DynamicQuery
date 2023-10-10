@@ -1360,6 +1360,10 @@ namespace System.Linq.Dynamic
 		{
 			if (expr.Type == type)
 				return expr;
+
+			if (type.IsGenericParameter)
+				return null;
+
 			if (expr is ConstantExpression)
 			{
 				ConstantExpression ce = (ConstantExpression)expr;
