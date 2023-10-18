@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -292,6 +293,35 @@ namespace System.Linq.Dynamic.Tests
                 }
             };
             Assert.Equal(true, func(obj));
+        }
+
+        [Fact]
+        public void CanInvokeSelect()
+        {
+            var expr = DynamicExpression.ParseLambda<IEnumerable<Item>, IEnumerable>("it.Select(new(Id, Name))");
+            var func = expr.Compile();
+
+            var res = func(new[]
+            {
+                new Item { Id = 1, Name = "one", Title = "title one" },
+                new Item { Id = 2, Name = "two", Title = "title two" },
+            });
+
+            var mappedItems = res.Cast<dynamic>().ToList();
+            Assert.Equal(2, mappedItems.Count);
+
+            Assert.Equal(1, mappedItems[0].Id);
+            Assert.Equal("one", mappedItems[0].Name);
+
+            Assert.Equal(2, mappedItems[1].Id);
+            Assert.Equal("two", mappedItems[1].Name);
+        }
+
+        private class Item
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Title { get; set; }
         }
     }
 
