@@ -30,13 +30,18 @@ namespace System.Linq.Dynamic
 		public bool Equals(Signature other)
 		{
 			if (properties.Length != other.properties.Length)
-				return false;
-			for (int i = 0; i < properties.Length; i++)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < properties.Length; i++)
 			{
 				if (properties[i].Name != other.properties[i].Name ||
 					properties[i].Type != other.properties[i].Type)
-					return false;
-			}
+                {
+                    return false;
+                }
+            }
 			return true;
 		}
 	}

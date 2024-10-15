@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
-using DynamicExpression = System.Linq.Dynamic.DynamicExpression;
 
 namespace System.Linq.Dynamic.Tests
 {
@@ -23,7 +20,7 @@ namespace System.Linq.Dynamic.Tests
 
             var results = values.Where(expr).ToList();
 
-            Assert.Equal(1, results.Count);
+            Assert.Single(results);
             Assert.Equal("food", results[0]);
         }
 
@@ -322,6 +319,48 @@ namespace System.Linq.Dynamic.Tests
             public int Id { get; set; }
             public string Name { get; set; }
             public string Title { get; set; }
+        }
+
+        [Fact]
+        public void CanInvokeOrderBy()
+        {
+            var expr = DynamicExpression.ParseLambda<IEnumerable<Item>, IEnumerable>("it.OrderBy(Name)");
+            var func = expr.Compile();
+
+            var res = func(new[]
+            {
+                new Item { Id = 1, Name = "c", Title = "title one" },
+                new Item { Id = 2, Name = "a", Title = "title two" },
+                new Item { Id = 3, Name = "b", Title = "title two" },
+            });
+
+            var mappedItems = res.Cast<dynamic>().ToList();
+            Assert.Equal(3, mappedItems.Count);
+
+            Assert.Equal(2, mappedItems[0].Id);
+            Assert.Equal(3, mappedItems[1].Id);
+            Assert.Equal(1, mappedItems[2].Id);
+        }
+
+        [Fact]
+        public void CanInvokeOrderByDescending()
+        {
+            var expr = DynamicExpression.ParseLambda<IEnumerable<Item>, IEnumerable>("it.OrderByDescending(Name)");
+            var func = expr.Compile();
+
+            var res = func(new[]
+            {
+                new Item { Id = 1, Name = "c", Title = "title one" },
+                new Item { Id = 2, Name = "a", Title = "title two" },
+                new Item { Id = 3, Name = "b", Title = "title two" },
+            });
+
+            var mappedItems = res.Cast<dynamic>().ToList();
+            Assert.Equal(3, mappedItems.Count);
+
+            Assert.Equal(1, mappedItems[0].Id);
+            Assert.Equal(3, mappedItems[1].Id);
+            Assert.Equal(2, mappedItems[2].Id);
         }
     }
 
